@@ -70,9 +70,7 @@ public class PresentyList_testManagemnet extends RecyclerView.ViewHolder{
             }else
             {
                 mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp);
-            }
-
-        }
+            }}
 
     }
 }

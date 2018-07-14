@@ -242,7 +242,7 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
         Log.d("don","totalString="+totalString);
 
     }
-    */
+
 
     private void retrievePrefs() {
 
@@ -254,6 +254,8 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
         }
         Log.d("don","onRetrieve"+presentArray);
     }
+    */
+
 
     private void getDurationQuery() {
 
@@ -269,7 +271,6 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
 
                     if (snap.getKey().contains(mSelectedClass)) {
                         keyToSearch=snap.getKey();
-                      //  retrievePrefs();
                         setFirebaseAdapter();
                         count++;
 
@@ -321,6 +322,8 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
                         if (presentArray.size() < position + 1) {
                             presentArray.add(position, "yes");
                             smsSentArray.add(position,"no");
+                            studentIdArray.add(position, model.getId());
+                            studentNamesArray.add(position, model.getName());
                          }
 
 
@@ -340,8 +343,6 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
                                 //GetCoverage("+918668737792");
                             }
                         });
-                        studentIdArray.add(position, model.getId());
-                        studentNamesArray.add(position, model.getName());
 
 
                         viewHolder.mPresenetLayout.setOnClickListener(new View.OnClickListener() {
@@ -356,8 +357,8 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
                                 viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
                                 viewHolder.mSendMessage.setEnabled(false);
 
-                            }
-                        });
+                            }});
+
 
                         viewHolder.mAbsentLayout.setOnClickListener(new View.OnClickListener() {
                             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -371,11 +372,10 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
                                 if(smsSentArray.get(position).equals("no")) {
                                     viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp);
                                     viewHolder.mSendMessage.setEnabled(true);
-                                }
-                            }
-                        });
-                    }
-                };
+
+                                }}});
+
+                    }};
 
         recyclerView.setAdapter(firebaseRecyclerAdapter);
     }
@@ -391,7 +391,8 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
     private void uploadDetails() {
 
         //making combine string
-
+                Log.d("upload+presentArray",""+presentArray);
+            Log.d("upload+studentId",""+studentIdArray);
                 if((mOutOfMarksText.getText().toString()).isEmpty()){
                     mOutOfMarksText.setError("Enter marks");
                     Toast.makeText(getApplicationContext(),"Please type Total Marks !",Toast.LENGTH_SHORT).show();
@@ -409,6 +410,7 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
                       else
                           temp=","+studentNamesArray.get(count)+"="+studentIdArray.get(count) ;
 
+                      Log.d("upload",""+temp);
                       totalPresent.append(temp);
                       count++;
                 }
