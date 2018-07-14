@@ -161,7 +161,7 @@ public class RecordTest extends BaseAdapter {
 
         String test = "आपला पाल्य "+name+" ला दि."+dateOfTest+" ला झालेल्या " +subjectOfTest +" च्या टेस्टमध्ये "+TotalMarks+" पैकी "+marks+" मार्कस मिळाले. ओम क्लासेस";
         ArrayList<String> parts = manager.divideMessage(test);
-        manager.sendMultipartTextMessage("+917775971543",null,parts,null,null);
+        manager.sendMultipartTextMessage("+91"+mobNo,null,parts,null,null);
 
         FirebaseDatabase.getInstance().getReference().child(mSelectedStanderd+durationText).child("record")
                 .child(studentIdArray.get(position) + "/" + key + "/" + "isSmsSent")

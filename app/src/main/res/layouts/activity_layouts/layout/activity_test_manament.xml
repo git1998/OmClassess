@@ -7,6 +7,12 @@
     android:padding="10dp"
     tools:context="ltd.akhbod.omclasses.TestManagmentActivity">
 
+    <TextView
+        android:id="@+id/TestManagment_raw"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:text=""/>
     <Button
         android:id="@+id/TestManagment_upload"
         android:layout_width="match_parent"
@@ -73,7 +79,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/TestManagment_recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
             android:orientation="vertical"
             android:paddingTop="10dp" >

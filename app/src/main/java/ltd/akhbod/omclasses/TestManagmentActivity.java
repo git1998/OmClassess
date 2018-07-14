@@ -3,8 +3,10 @@ package ltd.akhbod.omclasses;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
 import android.os.Build;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -40,8 +42,10 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import ltd.akhbod.omclasses.ExternalLibrarbyClasses.ClickatellHttp;
 import ltd.akhbod.omclasses.ModalClasses.ProfileDetails;
@@ -55,7 +59,7 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
 
 
     //layout variables
-    private TextView mDateText;
+    private TextView mDateText,mRawText;
     private Spinner mSubjectSpinner;
     private Spinner mClassSpinner;
     private EditText mOutOfMarksText;
@@ -67,8 +71,10 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
 
 
     //Activity variables
+    private final String MY_PREFS_NAME="presenty";
     private DatePickerDialog datePickerDialog;
-    private  ArrayList<String> presentArray=new ArrayList<>();
+    private  List<String> presentArray=new ArrayList<>();
+    private  ArrayList<String> smsSentArray=new ArrayList<>();
     private final ArrayList<String> studentIdArray=new ArrayList<>();
     private final ArrayList<String> studentNamesArray=new ArrayList<>();
     private ClickatellHttp httpApi;
@@ -88,9 +94,6 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
         setContentView(R.layout.activity_test_manament);
 
 
-        if(savedInstanceState != null){
-            presentArray = savedInstanceState.getStringArrayList("Presenty");
-        }
         //checking permissions
         checkPermission();
 
@@ -101,6 +104,7 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
         currentYear= Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
         durationText= "("+currentYear+"-"+(currentYear+1)+")";
 
+        mRawText=findViewById(R.id.TestManagment_raw);
         mDateText=findViewById(R.id.TestManagment_dateText);
         mSubjectSpinner=findViewById(R.id.TestManagment_subjectSpinner);
         mClassSpinner=findViewById(R.id.TestManagment_classSpinner);
@@ -190,18 +194,65 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
             }});
 
 
-
+        getDurationQuery();
     }
-
+/*
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putStringArrayList("Presenty",presentArray);
+    protected void onPause() {
+        super.onPause();
+        Log.d("don","OnPause:presentArraylist"+presentArray);
+        int count=0;
+        String totalPresentStr = null;
+        Log.d("don","presentarray:size:"+presentArray.size());
+
+        while (count<presentArray.size()){
+            Log.d("don","Str:"+presentArray.get(count));
+
+            if(count==0)  totalPresentStr=presentArray.get(count);
+            else
+                totalPresentStr+=","+presentArray.get(count);
+        }
+        Log.d("don","totalPresentStr:"+totalPresentStr);
+        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putString("presenty",totalPresentStr);
+        editor.apply();
     }
+
+*/
     @Override
     protected void onStart() {
         super.onStart();
-        getDurationQuery();
+     //   retrievePrefs();
+    }
+
+    /*
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        String totalString="";
+        int count=0;
+        for(String str : presentArray){
+            if(count==0){ totalString = totalString + str; count=1;}
+            else
+                totalString += ","+str;
+        }
+        Log.d("don","presentArray="+presentArray);
+        mRawText.setText(totalString);
+        Log.d("don","totalString="+totalString);
+
+    }
+    */
+
+    private void retrievePrefs() {
+
+        Log.d("don","Retrive="+presentArray);
+
+        String[] parts=mRawText.getText().toString().split(",");
+        for(String str : parts){
+            presentArray.add(str);
+        }
+        Log.d("don","onRetrieve"+presentArray);
     }
 
     private void getDurationQuery() {
@@ -218,6 +269,7 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
 
                     if (snap.getKey().contains(mSelectedClass)) {
                         keyToSearch=snap.getKey();
+                      //  retrievePrefs();
                         setFirebaseAdapter();
                         count++;
 
@@ -248,83 +300,91 @@ public class TestManagmentActivity extends AppCompatActivity implements DatePick
 
         //Log.d("abhi","setFirebaseAdapter()");
 
-        Query query=ref.child(keyToSearch).child("profile").orderByChild("name");
+
+        Query query = ref.child(keyToSearch).child("profile").orderByChild("name");
 
 
-        FirebaseRecyclerAdapter<ProfileDetails,PresentyList_testManagemnet> firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<ProfileDetails, PresentyList_testManagemnet>(
+        FirebaseRecyclerAdapter<ProfileDetails, PresentyList_testManagemnet> firebaseRecyclerAdapter =
+                new FirebaseRecyclerAdapter<ProfileDetails, PresentyList_testManagemnet>(
 
-                ProfileDetails.class,
-                R.layout.management_singleitem_layout,
-                PresentyList_testManagemnet.class,
-                query
+                        ProfileDetails.class,
+                        R.layout.management_singleitem_layout,
+                        PresentyList_testManagemnet.class,
+                        query
 
-        ) {
-            @Override
-            protected void populateViewHolder(final PresentyList_testManagemnet viewHolder, final ProfileDetails model, final int position) {
-
-               // Log.d("abhi",""+position);
-                String present = "x";
-                if(presentArray.size()> position){
-                     present = presentArray.get(position);
-                }
-
-                viewHolder.setDetails(getApplicationContext(),model,position,present);
-              //  viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
-              //  viewHolder.mSendMessage.setEnabled(false);
-
-                viewHolder.mSendMessage.setOnClickListener(new View.OnClickListener() {
+                ) {
                     @Override
-                    public void onClick(View v) {
-                        // viewHolder.progressBar.setVisibility(View.VISIBLE);
-                        viewHolder.mSendMessage.setEnabled(false);
-                        viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
-                        viewHolder.mSendMessage.setImageResource(R.drawable.ic_done_black_24dp);
-                        sendMessage(model.getMobNo(),model.getName());
-                        // sendSingleMessage("+917775971543","Hii this is Om Class.");
-                        //GetCoverage("+918668737792");
-                    }});
-                studentIdArray.add(position,model.getId());
-                studentNamesArray.add(position,model.getName());
-               // presentArray.add(position,"yes");
+                    protected void populateViewHolder(final PresentyList_testManagemnet viewHolder, final ProfileDetails model, final int position) {
+                        // final String key=testAdapter.getRef(position).getKey();
+                        // Log.d("abhi",""+position);
 
-                viewHolder.mPresenetLayout.setOnClickListener(new View.OnClickListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    @Override
-                    public void onClick(View v) {
-                        viewHolder.mPresenetLayout.setBackgroundResource(R.color.green);
-                        viewHolder.mAbsentLayout.setBackground(null);
-                        presentArray.add(position,"yes");
-                       // viewHolder.mView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),R.color.grey));
-
-                        viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
-                        viewHolder.mSendMessage.setEnabled(false);
-
-                    }});
-
-                viewHolder.mAbsentLayout.setOnClickListener(new View.OnClickListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    @Override
-                    public void onClick(View v) {
-                        viewHolder.mAbsentLayout.setBackgroundResource(R.color.red);
-                        viewHolder.mPresenetLayout.setBackground(null);
-                        presentArray.add(position,"no");
-
-                        viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp);
-                        viewHolder.mSendMessage.setEnabled(true);
-                    }});
+                        if (presentArray.size() < position + 1) {
+                            presentArray.add(position, "yes");
+                            smsSentArray.add(position,"no");
+                         }
 
 
-            }};
+                        viewHolder.setDetails(getApplicationContext(), model, position, presentArray.get(position),smsSentArray.get(position));
+
+                        viewHolder.mSendMessage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                // viewHolder.progressBar.setVisibility(View.VISIBLE);
+                                smsSentArray.set(position,"yes");
+                                viewHolder.mSendMessage.setEnabled(false);
+                                viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
+                                viewHolder.mSendMessage.setImageResource(R.drawable.ic_done_black_24dp);
+
+                                sendMessage(model.getMobNo(), model.getName());
+                                // sendSingleMessage("+917775971543","Hii this is Om Class.");
+                                //GetCoverage("+918668737792");
+                            }
+                        });
+                        studentIdArray.add(position, model.getId());
+                        studentNamesArray.add(position, model.getName());
+
+
+                        viewHolder.mPresenetLayout.setOnClickListener(new View.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                            @Override
+                            public void onClick(View v) {
+                                viewHolder.mPresenetLayout.setBackgroundResource(R.color.green);
+                                viewHolder.mAbsentLayout.setBackground(null);
+                                presentArray.set(position, "yes");
+                                // viewHolder.mView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),R.color.grey));
+
+                                viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
+                                viewHolder.mSendMessage.setEnabled(false);
+
+                            }
+                        });
+
+                        viewHolder.mAbsentLayout.setOnClickListener(new View.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                            @Override
+                            public void onClick(View v) {
+                                viewHolder.mAbsentLayout.setBackgroundResource(R.color.red);
+                                viewHolder.mPresenetLayout.setBackground(null);
+                                presentArray.set(position, "no");
+                                Log.d("absent","absemnt"+position);
+
+                                if(smsSentArray.get(position).equals("no")) {
+                                    viewHolder.mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp);
+                                    viewHolder.mSendMessage.setEnabled(true);
+                                }
+                            }
+                        });
+                    }
+                };
+
         recyclerView.setAdapter(firebaseRecyclerAdapter);
     }
-
-
     private void sendMessage(String mobNo, String name) {
 
         SmsManager manager = SmsManager.getDefault();
         String test = "आपला पाल्य "+name+" दि."+currentDate+" ला झालेल्या " +mSelectedSubject +" च्या टेस्ट ला अनुपस्थित होता. ओम क्लासेस";
         ArrayList<String> parts = manager.divideMessage(test);
-        manager.sendMultipartTextMessage("+917775971543",null,parts,null,null);
+        manager.sendMultipartTextMessage("+9177759743",null,parts,null,null);
     }
 
 

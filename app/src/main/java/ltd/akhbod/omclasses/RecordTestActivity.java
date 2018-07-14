@@ -215,6 +215,7 @@ public class RecordTestActivity extends AppCompatActivity {
 
 
     private void setAdapter() {
+        Log.d("don","mobNo:"+mobNoArray);
         adapter=new RecordTest(getApplicationContext(),marksArray,studentIdArray,
                 studentNamesArray,key,studentNamesArray.size(),smsSendArray,mobNoArray,mSelectedStanderd,durationText,outOfMarks);
         mListView.setAdapter(adapter);

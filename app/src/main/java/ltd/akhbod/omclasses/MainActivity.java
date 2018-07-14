@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -31,9 +32,19 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("");
         getSupportActionBar().hide();
 
-        //FirebaseAuth auth = FirebaseAuth.getInstance();
-       // auth.signInAnonymously();
-        loginDialog();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.signInAnonymously().addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if(task.isSuccessful()){
+                    Log.d("don","login succesee");
+                }else
+                {
+                    Log.d("don","login failed"+task.getException().getMessage());
+                }
+            }
+        });
+       // loginDialog();
 
         ImageView mLogoImage = findViewById(R.id.imageView2);
         Button mUploadBtn = findViewById(R.id.main_upload);
@@ -58,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(getApplicationContext(),TestManagmentActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
             }});
     }

@@ -2,10 +2,13 @@ package ltd.akhbod.omclasses.ViewHolders;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.List;
 
 import ltd.akhbod.omclasses.ModalClasses.ProfileDetails;
 import ltd.akhbod.omclasses.R;
@@ -34,22 +37,41 @@ public class PresentyList_testManagemnet extends RecyclerView.ViewHolder{
     }
 
 
-    public void setDetails(Context applicationContext, ProfileDetails model, final int position,String present) {
+    public void setDetails(Context applicationContext, ProfileDetails model, final int position, String present, String isSmsSent) {
 
         mName.setText(position+1+". "+model.getName());
+
+
+        if(isSmsSent.equals("no")){
+            mSendMessage.setImageResource(android.R.color.transparent);
+            mSendMessage.setEnabled(true);
+        }
+        else{
+            mSendMessage.setEnabled(false);
+            mSendMessage.setImageResource(R.drawable.ic_done_black_24dp);
+        }
+
+
+
         if(present.matches("yes")){
             mPresenetLayout.setBackgroundResource(R.color.green);
             mAbsentLayout.setBackground(null);
+
             mSendMessage.setEnabled(false);
-        }else if(present.matches("x")){
-            mPresenetLayout.setBackground(null);
-            mAbsentLayout.setBackground(null);
-           // mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
-            mSendMessage.setEnabled(false);
-        }else{
+            mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
+
+        }
+        else if(present.matches("no")){
             mAbsentLayout.setBackgroundResource(R.color.red);
-            mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp);
-            mSendMessage.setEnabled(true);
+            mPresenetLayout.setBackground(null);
+
+            if(isSmsSent.equals("yes")) {
+                mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp_grey);
+            }else
+            {
+                mSendMessage.setBackgroundResource(R.drawable.ic_message_black_24dp);
+            }
+
         }
 
     }

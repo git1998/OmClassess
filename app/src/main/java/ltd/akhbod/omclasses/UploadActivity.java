@@ -465,7 +465,6 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     private void uploadPhoto(String pushId, final ProfileDetails obj) {
-        pushId= ref.push().getKey();
         final String finalPushId = pushId;
         if(compressedImage != null){
             FirebaseStorage storage = FirebaseStorage.getInstance();
